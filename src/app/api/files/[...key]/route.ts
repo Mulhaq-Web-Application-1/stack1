@@ -38,7 +38,7 @@ export async function GET(
     if (contentType) headers.set("Content-Type", contentType);
     // Allow caching so repeated image loads don't hit R2 every time
     headers.set("Cache-Control", "public, max-age=3600, s-maxage=3600");
-    return new NextResponse(body, { headers });
+    return new NextResponse(new Uint8Array(body), { headers });
   } catch (err) {
     console.error("Files proxy error:", err);
     const message = err instanceof Error ? err.message : "Failed to resolve file";

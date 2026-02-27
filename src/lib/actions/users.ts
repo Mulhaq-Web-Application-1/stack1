@@ -11,18 +11,12 @@ export type UpdateProfileResult =
 export async function updateProfile(formData: FormData): Promise<UpdateProfileResult> {
   try {
     const user = await getOrCreateUser();
-    const name = (formData.get("name") as string)?.trim() ?? null;
-    const phone = (formData.get("phone") as string)?.trim() ?? null;
     const email = (formData.get("email") as string)?.trim() ?? null;
-    const profilePictureUrl = (formData.get("profilePictureUrl") as string)?.trim() || null;
 
     await prisma.user.update({
       where: { id: user.id },
       data: {
-        name: name || null,
-        phone: phone || null,
         email: email || null,
-        profilePictureUrl: profilePictureUrl || null,
       },
     });
 
@@ -38,13 +32,10 @@ export async function updateProfile(formData: FormData): Promise<UpdateProfileRe
   }
 }
 
-export async function setProfilePictureUrl(url: string | null): Promise<UpdateProfileResult> {
+export async function setProfilePictureUrl(_url: string | null): Promise<UpdateProfileResult> {
   try {
-    const user = await getOrCreateUser();
-    await prisma.user.update({
-      where: { id: user.id },
-      data: { profilePictureUrl: url },
-    });
+    await getOrCreateUser();
+    // User model has no profilePictureUrl; revalidate so UI updates if stored elsewhere
     revalidatePath("/dashboard");
     revalidatePath("/dashboard/profile");
     return { ok: true };

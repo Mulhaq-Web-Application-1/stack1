@@ -9,8 +9,6 @@ async function main() {
     create: {
       clerkUserId: "seed_user_1",
       email: "alice@example.com",
-      name: "Alice",
-      phone: "+1 555 0100",
     },
     update: {},
   });
@@ -19,8 +17,6 @@ async function main() {
     create: {
       clerkUserId: "seed_user_2",
       email: "bob@example.com",
-      name: "Bob",
-      phone: "+1 555 0101",
     },
     update: {},
   });
@@ -29,7 +25,6 @@ async function main() {
     create: {
       clerkUserId: "seed_user_3",
       email: "carol@example.com",
-      name: "Carol",
     },
     update: {},
   });

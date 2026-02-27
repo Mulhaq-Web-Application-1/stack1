@@ -20,12 +20,12 @@ type GroupWithDetails = {
     _count?: { pages: number };
   }>;
   members: Array<{
-    id: string;
+    userId: string;
+    groupId: string;
     role: string;
     user: {
-      name: string | null;
+      id: string;
       email: string | null;
-      profilePictureUrl: string | null;
     };
   }>;
   pages: Array<{
@@ -98,18 +98,17 @@ export function GroupDetailContent(props: {
             <ul className="space-y-2">
               {group.members.map((m) => (
                 <li
-                  key={m.id}
+                  key={`${m.userId}_${m.groupId}`}
                   className="flex items-center gap-3 rounded-lg p-2 hover:bg-accent"
                 >
                   <Avatar className="h-8 w-8">
-                    <AvatarImage src={toDisplayUrl(m.user.profilePictureUrl) ?? m.user.profilePictureUrl ?? undefined} />
                     <AvatarFallback>
-                      {(m.user.name ?? m.user.email ?? "?").slice(0, 1).toUpperCase()}
+                      {(m.user.email ?? "?").slice(0, 1).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
                   <div className="min-w-0 flex-1">
                     <p className="font-medium truncate">
-                      {m.user.name || m.user.email || "Unknown"}
+                      {m.user.email || "Unknown"}
                     </p>
                     <p className="text-xs text-muted-foreground">{m.role}</p>
                   </div>

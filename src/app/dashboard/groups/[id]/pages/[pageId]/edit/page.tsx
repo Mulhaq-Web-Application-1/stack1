@@ -49,8 +49,8 @@ export default async function EditPagePage({
           parentGroupLogoUrl: page.parentGroupLogoUrl,
           childGroupLogoUrl: page.childGroupLogoUrl,
         }}
-        defaultParentGroupLogoUrl={group.parentGroup?.logoUrl}
-        defaultChildGroupLogoUrl={group.childGroups[0]?.logoUrl}
+        defaultParentGroupLogoUrl={group.parentGroup?.logoUrl ?? null}
+        defaultChildGroupLogoUrl={group.childGroups[0]?.logoUrl ?? null}
       />
     </div>
   );

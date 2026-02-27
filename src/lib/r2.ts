@@ -32,7 +32,17 @@ export const r2Client = new S3Client({
 
 export const R2_BUCKET = bucketName ?? "";
 
+export function isR2Configured(): boolean {
+  return !!(accountId && accessKeyId && secretAccessKey && bucketName);
+}
+
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+const IMAGE_TYPES = [
+  "image/jpeg",
+  "image/png",
+  "image/gif",
+  "image/webp",
+];
 const ALLOWED_TYPES = [
   "image/jpeg",
   "image/png",
@@ -61,10 +71,62 @@ export function validateFile(file: File): UploadValidation {
   return { ok: true };
 }
 
+export function validateImageFile(file: File): UploadValidation {
+  if (file.size > MAX_FILE_SIZE) {
+    return { ok: false, error: "File size must be under 10MB" };
+  }
+  if (!IMAGE_TYPES.includes(file.type)) {
+    return {
+      ok: false,
+      error: `Allowed image types: JPEG, PNG, GIF, WebP. Got: ${file.type}`,
+    };
+  }
+  return { ok: true };
+}
+
 export function getR2Key(userId: string, filename: string): string {
   const sanitized = filename.replace(/[^a-zA-Z0-9._-]/g, "_");
   const timestamp = Date.now();
   return `uploads/${userId}/${timestamp}-${sanitized}`;
+}
+
+export function getR2KeyForImage(
+  prefix: "profile" | "group" | "page",
+  identifier: string,
+  filename: string
+): string {
+  const sanitized = filename.replace(/[^a-zA-Z0-9._-]/g, "_");
+  const timestamp = Date.now();
+  return `${prefix}/${identifier}/${timestamp}-${sanitized}`;
+}
+
+const R2_PUBLIC_URL = process.env.R2_PUBLIC_URL?.replace(/\/$/, "") ?? "";
+
+export function getPublicUrlForKey(key: string): string {
+  if (R2_PUBLIC_URL) {
+    return `${R2_PUBLIC_URL}/${key}`;
+  }
+  return `/api/files/${key}`;
+}
+
+export async function getObjectFromR2(
+  key: string
+): Promise<{ body: Buffer; contentType?: string }> {
+  const result = await r2Client.send(
+    new GetObjectCommand({
+      Bucket: R2_BUCKET,
+      Key: key,
+    })
+  );
+  const stream = result.Body;
+  if (!stream) {
+    throw new Error("NoSuchKey");
+  }
+  const bytes = await stream.transformToByteArray();
+  return {
+    body: Buffer.from(bytes),
+    contentType: result.ContentType ?? undefined,
+  };
 }
 
 export async function uploadToR2(

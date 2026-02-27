@@ -5,9 +5,6 @@ export type DbUser = {
   id: string;
   clerkUserId: string;
   email: string | null;
-  name: string | null;
-  phone: string | null;
-  profilePictureUrl: string | null;
   createdAt: Date;
   updatedAt: Date;
 };
@@ -19,9 +16,6 @@ export async function getOrCreateUser(): Promise<DbUser> {
 
   const clerkUser = await (await import("@clerk/nextjs/server")).currentUser();
   const email = clerkUser?.emailAddresses?.[0]?.emailAddress ?? null;
-  const name = clerkUser?.firstName || clerkUser?.lastName
-    ? [clerkUser.firstName, clerkUser.lastName].filter(Boolean).join(" ")
-    : null;
 
   let user = await prisma.user.findUnique({ where: { clerkUserId: userId } });
   if (!user) {
@@ -29,7 +23,6 @@ export async function getOrCreateUser(): Promise<DbUser> {
       data: {
         clerkUserId: userId,
         email: email ?? undefined,
-        name: name ?? undefined,
       },
     });
   }
