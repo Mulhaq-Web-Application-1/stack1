@@ -9,24 +9,30 @@ async function main() {
     create: {
       clerkUserId: "seed_user_1",
       email: "alice@example.com",
+      name: "Alice Smith",
+      phone: "+1 555 111 0001",
     },
-    update: {},
+    update: { name: "Alice Smith", phone: "+1 555 111 0001" },
   });
   const u2 = await prisma.user.upsert({
     where: { clerkUserId: "seed_user_2" },
     create: {
       clerkUserId: "seed_user_2",
       email: "bob@example.com",
+      name: "Bob Jones",
+      phone: "+1 555 222 0002",
     },
-    update: {},
+    update: { name: "Bob Jones", phone: "+1 555 222 0002" },
   });
   const u3 = await prisma.user.upsert({
     where: { clerkUserId: "seed_user_3" },
     create: {
       clerkUserId: "seed_user_3",
       email: "carol@example.com",
+      name: "Carol Lee",
+      phone: "+1 555 333 0003",
     },
-    update: {},
+    update: { name: "Carol Lee", phone: "+1 555 333 0003" },
   });
 
   // Root group
@@ -113,7 +119,21 @@ async function main() {
     });
   }
 
-  console.log("Seed complete: users 3, groups 3, memberships 4, pages 2");
+  // Extra page for Backend group
+  const backendPage = await prisma.page.findFirst({
+    where: { groupId: backend.id, title: "API Guidelines" },
+  });
+  if (!backendPage) {
+    await prisma.page.create({
+      data: {
+        groupId: backend.id,
+        title: "API Guidelines",
+        description: "REST and internal API standards",
+      },
+    });
+  }
+
+  console.log("Seed complete: users 3, groups 3, memberships 4, pages 3");
 }
 
 main()

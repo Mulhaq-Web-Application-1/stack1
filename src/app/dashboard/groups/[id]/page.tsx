@@ -17,10 +17,30 @@ export default async function GroupDetailPage({
       members: { some: { userId: user.id } },
     },
     include: {
-      parentGroup: true,
-      childGroups: { include: { _count: { select: { pages: true } } } },
-      members: { include: { user: true } },
-      pages: true,
+      parentGroup: { select: { id: true, name: true } },
+      childGroups: {
+        select: {
+          id: true,
+          name: true,
+          logoUrl: true,
+          _count: { select: { pages: true } },
+        },
+      },
+      members: {
+        include: {
+          user: {
+            select: {
+              id: true,
+              email: true,
+              name: true,
+              profileImageUrl: true,
+            },
+          },
+        },
+      },
+      pages: {
+        select: { id: true, title: true, description: true, coverPhotoUrl: true },
+      },
     },
   });
 

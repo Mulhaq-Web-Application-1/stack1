@@ -10,14 +10,17 @@ datasource db {
 }
 
 model User {
-  id            String         @id @default(cuid())
-  clerkUserId   String         @unique
-  email         String?
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-  files         File[]
-  organizations OrganizationMember[]
-  groupMembers  GroupMember[]
+  id                String         @id @default(cuid())
+  clerkUserId       String         @unique
+  email             String?
+  name              String?
+  phone             String?
+  profileImageUrl   String?        // R2 URL/key for display via /api/files/...
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+  files             File[]
+  organizations     OrganizationMember[]
+  groupMembers      GroupMember[]
 }
 
 model Organization {

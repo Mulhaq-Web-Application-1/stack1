@@ -111,6 +111,8 @@ export async function setPageCoverUrl(
     });
     revalidatePath(`/dashboard/groups/${page.groupId}`);
     revalidatePath(`/dashboard/groups/${page.groupId}/pages`);
+    revalidatePath(`/dashboard/groups/${page.groupId}/pages/${pageId}`);
+    revalidatePath(`/dashboard/groups/${page.groupId}/pages/${pageId}/edit`);
     return { ok: true, id: pageId };
   } catch (err) {
     console.error("Set page cover error:", err);

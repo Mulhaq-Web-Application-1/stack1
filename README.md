@@ -89,7 +89,9 @@ Copy `.env.example` to `.env` and fill in:
 npm run db:generate
 npm run db:push
 # or, for versioned migrations:
-# npm run db:migrate
+npm run db:migrate
+# Optional: seed sample users, groups, and pages (requires tsx: npm i -D tsx)
+npm run db:seed
 ```
 
 ### 4. Run
@@ -104,9 +106,13 @@ Open [http://localhost:3000](http://localhost:3000). Sign up, then use the dashb
 
 - **Landing** (`/`): public; sign-in / sign-up / dashboard links.
 - **Auth**: Clerk sign-in/sign-up; middleware protects `/dashboard` and API routes.
-- **Dashboard** (`/dashboard`): list files, upload (to R2), delete (R2 + DB).
-- **File upload**: server action, size/type validation, progress and toasts.
-- **File download**: stored URL points to `/api/files/<key>`; API issues a presigned R2 URL and redirects.
+- **Users**: Profile page with name, email, phone, and profile picture (R2). User sync from Clerk on first load.
+- **Groups**: CRUD with hierarchical parent/child; group logo (R2); group tree UI; membership (many-to-many).
+- **Pages**: Per-group pages with cover photo (R2), title, description, parent/child group logo snapshots.
+- **REST API**: `GET /api/users/me`, `GET /api/groups`, `GET /api/groups/[id]`, `GET /api/groups/[id]/pages`. Image upload: `POST /api/upload/image` (FormData: file, prefix, identifier).
+- **Dashboard** (`/dashboard`): overview; **Groups** and **Profile** in nav; group detail shows members (with names/avatars), child groups, and pages.
+- **File upload**: server action + API; images for profile, group logo, page cover; size/type validation and toasts.
+- **File download**: stored URL points to `/api/files/<key>`; API streams from R2 when `R2_PUBLIC_URL` is not set.
 
 ## Scripts
 
@@ -120,6 +126,7 @@ Open [http://localhost:3000](http://localhost:3000). Sign up, then use the dashb
 | `npm run db:push`     | Push schema (no migration files) |
 | `npm run db:migrate`  | Run migrations           |
 | `npm run db:studio`   | Open Prisma Studio       |
+| `npm run db:seed`     | Seed users, groups, pages (requires `tsx`: `npx tsx prisma/seed.ts`) |
 
 ## Notes
 

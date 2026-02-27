@@ -14,20 +14,21 @@ export default async function EditGroupPage({
   const { id } = await params;
   const user = await getOrCreateUser();
 
-  const group = await prisma.group.findFirst({
-    where: {
-      id,
-      members: { some: { userId: user.id, role: "admin" } },
-    },
-  });
+  const [group, parentGroups] = await Promise.all([
+    prisma.group.findFirst({
+      where: {
+        id,
+        members: { some: { userId: user.id, role: "admin" } },
+      },
+    }),
+    prisma.group.findMany({
+      where: { id: { not: id } },
+      orderBy: { name: "asc" },
+      select: { id: true, name: true },
+    }),
+  ]);
 
   if (!group) notFound();
-
-  const parentGroups = await prisma.group.findMany({
-    where: { id: { not: id } },
-    orderBy: { name: "asc" },
-    select: { id: true, name: true },
-  });
 
   return (
     <div className="space-y-6">

@@ -10,7 +10,7 @@ type GroupTreeItem = {
   id: string;
   name: string;
   logoUrl?: string | null;
-  _count?: { pages: number };
+  _count?: { pages: number; members?: number };
   members?: unknown[];
   childGroups?: GroupTreeItem[];
 };
@@ -50,7 +50,7 @@ export function GroupTree({
               <p className="text-xs text-muted-foreground flex items-center gap-2">
                 <span className="flex items-center gap-1">
                   <Users className="h-3 w-3" />
-                  {Array.isArray(group.members) ? group.members.length : 0} members
+                  {group._count?.members ?? (Array.isArray(group.members) ? group.members.length : 0)} members
                 </span>
                 {(group._count?.pages ?? 0) > 0 && (
                   <span className="flex items-center gap-1">

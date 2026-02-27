@@ -11,7 +11,7 @@ export default function LandingPage() {
           <nav className="flex items-center gap-4">
             <SignedOut>
               <Link href="/sign-in">
-                <Button variant="ghost">Sign in</Button>
+                <Button variant="outline">Log in</Button>
               </Link>
               <Link href="/sign-up">
                 <Button>Sign up</Button>
@@ -36,14 +36,14 @@ export default function LandingPage() {
             start uploading files from your dashboard.
           </p>
           <SignedOut>
-            <div className="flex justify-center gap-4">
-              <Link href="/sign-up">
-                <Button size="lg">Get started</Button>
-              </Link>
+            <div className="flex flex-wrap justify-center gap-4">
               <Link href="/sign-in">
                 <Button size="lg" variant="outline">
-                  Sign in
+                  Log in
                 </Button>
+              </Link>
+              <Link href="/sign-up">
+                <Button size="lg">Get started</Button>
               </Link>
             </div>
           </SignedOut>

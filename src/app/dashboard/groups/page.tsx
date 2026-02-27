@@ -4,24 +4,37 @@ import { getOrCreateUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Plus, Users, FolderTree } from "lucide-react";
+import { Plus, FolderTree } from "lucide-react";
 import { GroupTree } from "./group-tree";
 import { toDisplayUrl } from "@/lib/image-url";
+
+const GROUPS_PAGE_SIZE = 100;
 
 export default async function GroupsPage() {
   const user = await getOrCreateUser();
 
+  // Single batched query: eager-load tree shape with counts only (no N+1, no full member lists)
   const memberships = await prisma.groupMember.findMany({
     where: { userId: user.id },
+    take: GROUPS_PAGE_SIZE,
+    orderBy: { groupId: "asc" },
     include: {
       group: {
-        include: {
-          parentGroup: true,
+        select: {
+          id: true,
+          name: true,
+          logoUrl: true,
+          parentGroupId: true,
+          parentGroup: { select: { id: true, name: true } },
           childGroups: {
-            include: { members: true, _count: { select: { pages: true } } },
+            select: {
+              id: true,
+              name: true,
+              logoUrl: true,
+              _count: { select: { pages: true, members: true } },
+            },
           },
-          members: { include: { user: true } },
-          _count: { select: { pages: true } },
+          _count: { select: { pages: true, members: true } },
         },
       },
     },

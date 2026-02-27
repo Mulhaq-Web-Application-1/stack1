@@ -27,6 +27,8 @@ type GroupWithDetails = {
     user: {
       id: string;
       email: string | null;
+      name: string | null;
+      profileImageUrl: string | null;
     };
   }>;
   pages: Array<{
@@ -105,15 +107,21 @@ export function GroupDetailContent(props: {
                   className="flex items-center gap-3 rounded-lg p-2 hover:bg-accent"
                 >
                   <Avatar className="h-8 w-8">
+                    <AvatarImage
+                      src={toDisplayUrl(m.user.profileImageUrl) ?? m.user.profileImageUrl ?? undefined}
+                      alt=""
+                    />
                     <AvatarFallback>
-                      {(m.user.email ?? "?").slice(0, 1).toUpperCase()}
+                      {(m.user.name ?? m.user.email ?? "?").slice(0, 1).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
                   <div className="min-w-0 flex-1">
                     <p className="font-medium truncate">
-                      {m.user.email || "Unknown"}
+                      {m.user.name || m.user.email || "Unknown"}
                     </p>
-                    <p className="text-xs text-muted-foreground">{m.role}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {m.user.email ? `${m.user.email} · ${m.role}` : m.role}
+                    </p>
                   </div>
                 </li>
               ))}

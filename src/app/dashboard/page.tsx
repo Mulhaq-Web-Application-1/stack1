@@ -1,19 +1,25 @@
-import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
+import { getOrCreateUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { FileList } from "@/components/dashboard/file-list";
 import { UploadForm } from "@/components/dashboard/upload-form";
 
 export default async function DashboardPage() {
-  const { userId } = await auth();
-  if (!userId) redirect("/sign-in");
+  let user;
+  try {
+    user = await getOrCreateUser();
+  } catch (err) {
+    // Only redirect when actually unauthenticated; let DB/Clerk errors surface
+    if (err instanceof Error && err.message === "Unauthorized") {
+      redirect("/sign-in");
+    }
+    throw err;
+  }
 
-  const user = await prisma.user.findUnique({
-    where: { clerkUserId: userId },
-    include: { files: { orderBy: { createdAt: "desc" } } },
+  const files = await prisma.file.findMany({
+    where: { userId: user.id },
+    orderBy: { createdAt: "desc" },
   });
-
-  const files = user?.files ?? [];
 
   return (
     <div className="space-y-8">

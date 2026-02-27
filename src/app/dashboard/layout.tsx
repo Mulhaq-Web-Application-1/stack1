@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
 import Link from "next/link";
 import { UserButton } from "@clerk/nextjs";
-import { LayoutDashboard, Home } from "lucide-react";
+import { LayoutDashboard, Home, Users, FolderTree } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export default async function DashboardLayout({
@@ -29,11 +29,29 @@ export default async function DashboardLayout({
           <Link
             href="/dashboard"
             className={cn(
-              "flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium bg-accent text-accent-foreground"
+              "flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
             )}
           >
             <LayoutDashboard className="h-4 w-4" />
             Dashboard
+          </Link>
+          <Link
+            href="/dashboard/groups"
+            className={cn(
+              "flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+            )}
+          >
+            <FolderTree className="h-4 w-4" />
+            Groups
+          </Link>
+          <Link
+            href="/dashboard/profile"
+            className={cn(
+              "flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+            )}
+          >
+            <Users className="h-4 w-4" />
+            Profile
           </Link>
         </nav>
       </aside>

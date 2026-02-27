@@ -40,7 +40,7 @@ export function ProfileForm({ user }: { user: DbUser }) {
         <ImageUpload
           prefix="profile"
           identifier={user.id}
-          currentImageUrl={null}
+          currentImageUrl={user.profileImageUrl ?? null}
           onUploadComplete={async (url) => {
             const r = await setProfilePictureUrl(url);
             if (r.ok) toast({ title: "Photo updated" });
@@ -50,6 +50,16 @@ export function ProfileForm({ user }: { user: DbUser }) {
         />
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid gap-2">
+            <Label htmlFor="name">Name</Label>
+            <Input
+              id="name"
+              name="name"
+              type="text"
+              defaultValue={user.name ?? ""}
+              placeholder="Your name"
+            />
+          </div>
+          <div className="grid gap-2">
             <Label htmlFor="email">Email</Label>
             <Input
               id="email"
@@ -57,6 +67,16 @@ export function ProfileForm({ user }: { user: DbUser }) {
               type="email"
               defaultValue={user.email ?? ""}
               placeholder="you@example.com"
+            />
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="phone">Phone</Label>
+            <Input
+              id="phone"
+              name="phone"
+              type="tel"
+              defaultValue={user.phone ?? ""}
+              placeholder="+1 234 567 8900"
             />
           </div>
           <Button type="submit" disabled={pending}>
