@@ -3,6 +3,10 @@
     "Neon": {
       "url": "https://mcp.neon.tech/mcp",
       "headers": {}
+    },
+    "Clerk": {
+      "url": "https://mcp.clerk.com/mcp",
+      "headers": {}
     }
   }
 }
