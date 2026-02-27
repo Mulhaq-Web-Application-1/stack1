@@ -3,8 +3,19 @@
 import { revalidatePath } from "next/cache";
 import { getOrCreateUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { deleteFromR2, extractR2Key, isR2Configured } from "@/lib/r2";
 
 export type PageResult = { ok: true; id: string } | { ok: false; error: string };
+
+async function requireGroupAdmin(pageId: string, userId: string) {
+  const page = await prisma.page.findUnique({ where: { id: pageId } });
+  if (!page) return { page: null, error: "Page not found" as string };
+  const membership = await prisma.groupMember.findFirst({
+    where: { groupId: page.groupId, userId, role: "admin" },
+  });
+  if (!membership) return { page: null, error: "Not authorized" as string };
+  return { page, error: null };
+}
 
 export async function createPage(
   groupId: string,
@@ -19,6 +30,8 @@ export async function createPage(
     const childGroupLogoUrl = (formData.get("childGroupLogoUrl") as string)?.trim() || null;
 
     if (!title) return { ok: false, error: "Title is required" };
+    if (title.length > 200) return { ok: false, error: "Title must be 200 characters or less" };
+    if (description && description.length > 500) return { ok: false, error: "Description must be 500 characters or less" };
 
     const page = await prisma.page.create({
       data: {
@@ -48,7 +61,10 @@ export async function updatePage(
   formData: FormData
 ): Promise<PageResult> {
   try {
-    await getOrCreateUser();
+    const user = await getOrCreateUser();
+    const { page: existingPage, error } = await requireGroupAdmin(pageId, user.id);
+    if (error) return { ok: false, error };
+
     const title = (formData.get("title") as string)?.trim();
     const description = (formData.get("description") as string)?.trim() ?? null;
     const coverPhotoUrl = (formData.get("coverPhotoUrl") as string)?.trim() || null;
@@ -56,6 +72,8 @@ export async function updatePage(
     const childGroupLogoUrl = (formData.get("childGroupLogoUrl") as string)?.trim() || null;
 
     if (!title) return { ok: false, error: "Title is required" };
+    if (title.length > 200) return { ok: false, error: "Title must be 200 characters or less" };
+    if (description && description.length > 500) return { ok: false, error: "Description must be 500 characters or less" };
 
     const page = await prisma.page.update({
       where: { id: pageId },
@@ -84,9 +102,16 @@ export async function updatePage(
 export async function deletePage(pageId: string): Promise<PageResult> {
   try {
     const user = await getOrCreateUser();
-    const page = await prisma.page.findUnique({ where: { id: pageId } });
-    if (!page) return { ok: false, error: "Page not found" };
+    const { page, error } = await requireGroupAdmin(pageId, user.id);
+    if (error || !page) return { ok: false, error: error ?? "Page not found" };
+
     await prisma.page.delete({ where: { id: pageId } });
+
+    if (page.coverPhotoUrl && isR2Configured()) {
+      const key = extractR2Key(page.coverPhotoUrl);
+      if (key) await deleteFromR2(key).catch(() => {});
+    }
+
     revalidatePath(`/dashboard/groups/${page.groupId}`);
     revalidatePath(`/dashboard/groups/${page.groupId}/pages`);
     return { ok: true, id: pageId };
@@ -104,7 +129,10 @@ export async function setPageCoverUrl(
   url: string | null
 ): Promise<PageResult> {
   try {
-    await getOrCreateUser();
+    const user = await getOrCreateUser();
+    const { error } = await requireGroupAdmin(pageId, user.id);
+    if (error) return { ok: false, error };
+
     const page = await prisma.page.update({
       where: { id: pageId },
       data: { coverPhotoUrl: url },

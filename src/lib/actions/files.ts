@@ -1,33 +1,16 @@
 "use server";
 
-import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
+import { getOrCreateUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import {
   uploadToR2,
   deleteFromR2,
   validateFile,
   getR2Key,
+  getPublicUrlForKey,
   R2_BUCKET,
 } from "@/lib/r2";
-
-const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
-
-async function getOrCreateUser() {
-  const { userId } = await auth();
-  if (!userId) throw new Error("Unauthorized");
-
-  const clerkUser = await (await import("@clerk/nextjs/server")).currentUser();
-  const email = clerkUser?.emailAddresses?.[0]?.emailAddress ?? null;
-
-  let user = await prisma.user.findUnique({ where: { clerkUserId: userId } });
-  if (!user) {
-    user = await prisma.user.create({
-      data: { clerkUserId: userId, email: email ?? undefined },
-    });
-  }
-  return user;
-}
 
 export type UploadResult = { ok: true; fileId: string } | { ok: false; error: string };
 
@@ -71,6 +54,38 @@ export async function uploadFile(formData: FormData): Promise<UploadResult> {
     return {
       ok: false,
       error: err instanceof Error ? err.message : "Upload failed",
+    };
+  }
+}
+
+/** Called after a presigned-URL upload completes client-side. Creates the DB record. */
+export async function confirmUpload(
+  key: string,
+  name: string,
+  size: number,
+  contentType: string
+): Promise<UploadResult> {
+  try {
+    const user = await getOrCreateUser();
+
+    // Verify the key belongs to this user
+    if (!key.startsWith(`uploads/${user.id}/`)) {
+      return { ok: false, error: "Invalid upload key" };
+    }
+
+    const url = getPublicUrlForKey(key);
+
+    const record = await prisma.file.create({
+      data: { name, url, size, key, userId: user.id },
+    });
+
+    revalidatePath("/dashboard");
+    return { ok: true, fileId: record.id };
+  } catch (err) {
+    console.error("Confirm upload error:", err);
+    return {
+      ok: false,
+      error: err instanceof Error ? err.message : "Confirm failed",
     };
   }
 }

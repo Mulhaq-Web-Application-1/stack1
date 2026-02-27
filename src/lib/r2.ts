@@ -153,6 +153,19 @@ export async function deleteFromR2(key: string): Promise<void> {
   );
 }
 
+/** Extract the R2 object key from a stored URL (public URL, proxy URL, or raw key). */
+export function extractR2Key(storedUrl: string): string | null {
+  if (!storedUrl) return null;
+  // /api/files/{key}
+  if (storedUrl.startsWith("/api/files/")) return storedUrl.slice("/api/files/".length);
+  // R2_PUBLIC_URL/{key}
+  const pub = process.env.R2_PUBLIC_URL?.replace(/\/$/, "");
+  if (pub && storedUrl.startsWith(pub + "/")) return storedUrl.slice(pub.length + 1);
+  // raw key (no http/https prefix)
+  if (!storedUrl.startsWith("http")) return storedUrl;
+  return null;
+}
+
 export async function getPresignedUploadUrl(
   key: string,
   contentType: string,

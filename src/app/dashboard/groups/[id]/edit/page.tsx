@@ -4,6 +4,7 @@ import { getOrCreateUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { Button } from "@/components/ui/button";
 import { GroupForm } from "../../group-form";
+import { DeleteGroupButton } from "./delete-group-button";
 import { ChevronLeft } from "lucide-react";
 
 export default async function EditGroupPage({
@@ -38,7 +39,10 @@ export default async function EditGroupPage({
           Back to group
         </Link>
       </Button>
-      <h1 className="text-2xl font-semibold">Edit group</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-semibold">Edit group</h1>
+        <DeleteGroupButton groupId={id} />
+      </div>
       <GroupForm
         group={{
           id: group.id,

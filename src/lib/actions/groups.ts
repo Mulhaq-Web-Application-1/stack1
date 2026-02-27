@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { getOrCreateUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { deleteFromR2, extractR2Key, isR2Configured } from "@/lib/r2";
 
 export type GroupResult = { ok: true; id: string } | { ok: false; error: string };
 export type GroupMemberResult = { ok: true } | { ok: false; error: string };
@@ -10,24 +11,33 @@ export type GroupMemberResult = { ok: true } | { ok: false; error: string };
 export async function createGroup(formData: FormData): Promise<GroupResult> {
   try {
     const user = await getOrCreateUser();
+    const userId = user?.id;
+    if (!userId) {
+      return { ok: false, error: "Please sign in to create a group." };
+    }
+
     const name = (formData.get("name") as string)?.trim();
     const description = (formData.get("description") as string)?.trim() ?? null;
     const logoUrl = (formData.get("logoUrl") as string)?.trim() || null;
     const parentGroupId = (formData.get("parentGroupId") as string)?.trim() || null;
 
     if (!name) return { ok: false, error: "Name is required" };
+    if (name.length > 100) return { ok: false, error: "Name must be 100 characters or less" };
+    if (description && description.length > 500) return { ok: false, error: "Description must be 500 characters or less" };
 
-    const group = await prisma.group.create({
-      data: {
-        name,
-        description,
-        logoUrl,
-        parentGroupId,
-      },
-    });
-
-    await prisma.groupMember.create({
-      data: { userId: user.id, groupId: group.id, role: "admin" },
+    const group = await prisma.$transaction(async (tx) => {
+      const g = await tx.group.create({
+        data: {
+          name,
+          description: description ?? null,
+          logoUrl: logoUrl ?? null,
+          parentGroupId: parentGroupId || null,
+        },
+      });
+      await tx.groupMember.create({
+        data: { userId, groupId: g.id, role: "admin" },
+      });
+      return g;
     });
 
     revalidatePath("/dashboard/groups");
@@ -35,10 +45,8 @@ export async function createGroup(formData: FormData): Promise<GroupResult> {
     return { ok: true, id: group.id };
   } catch (err) {
     console.error("Create group error:", err);
-    return {
-      ok: false,
-      error: err instanceof Error ? err.message : "Create failed",
-    };
+    const message = err instanceof Error ? err.message : "Create failed";
+    return { ok: false, error: message };
   }
 }
 
@@ -47,13 +55,20 @@ export async function updateGroup(
   formData: FormData
 ): Promise<GroupResult> {
   try {
-    await getOrCreateUser();
+    const user = await getOrCreateUser();
+    const membership = await prisma.groupMember.findFirst({
+      where: { groupId, userId: user.id, role: "admin" },
+    });
+    if (!membership) return { ok: false, error: "Not authorized" };
+
     const name = (formData.get("name") as string)?.trim();
     const description = (formData.get("description") as string)?.trim() ?? null;
     const logoUrl = (formData.get("logoUrl") as string)?.trim() || null;
     const parentGroupId = (formData.get("parentGroupId") as string)?.trim() || null;
 
     if (!name) return { ok: false, error: "Name is required" };
+    if (name.length > 100) return { ok: false, error: "Name must be 100 characters or less" };
+    if (description && description.length > 500) return { ok: false, error: "Description must be 500 characters or less" };
 
     await prisma.group.update({
       where: { id: groupId },
@@ -79,8 +94,20 @@ export async function updateGroup(
 
 export async function deleteGroup(groupId: string): Promise<GroupResult> {
   try {
-    await getOrCreateUser();
+    const user = await getOrCreateUser();
+    const membership = await prisma.groupMember.findFirst({
+      where: { groupId, userId: user.id, role: "admin" },
+    });
+    if (!membership) return { ok: false, error: "Not authorized" };
+
+    const group = await prisma.group.findUnique({ where: { id: groupId } });
     await prisma.group.delete({ where: { id: groupId } });
+
+    if (group?.logoUrl && isR2Configured()) {
+      const key = extractR2Key(group.logoUrl);
+      if (key) await deleteFromR2(key).catch(() => {});
+    }
+
     revalidatePath("/dashboard/groups");
     revalidatePath("/dashboard");
     return { ok: true, id: groupId };
@@ -98,7 +125,12 @@ export async function addMember(
   userId: string
 ): Promise<GroupMemberResult> {
   try {
-    await getOrCreateUser();
+    const caller = await getOrCreateUser();
+    const membership = await prisma.groupMember.findFirst({
+      where: { groupId, userId: caller.id, role: "admin" },
+    });
+    if (!membership) return { ok: false, error: "Not authorized" };
+
     await prisma.groupMember.create({
       data: { userId, groupId, role: "member" },
     });
@@ -120,6 +152,11 @@ export async function removeMember(
 ): Promise<GroupMemberResult> {
   try {
     const currentUser = await getOrCreateUser();
+    const callerMembership = await prisma.groupMember.findFirst({
+      where: { groupId, userId: currentUser.id, role: "admin" },
+    });
+    if (!callerMembership) return { ok: false, error: "Not authorized" };
+
     const membership = await prisma.groupMember.findUnique({
       where: { userId_groupId: { userId, groupId } },
     });
@@ -152,7 +189,12 @@ export async function setGroupLogoUrl(
   url: string | null
 ): Promise<GroupResult> {
   try {
-    await getOrCreateUser();
+    const user = await getOrCreateUser();
+    const membership = await prisma.groupMember.findFirst({
+      where: { groupId, userId: user.id, role: "admin" },
+    });
+    if (!membership) return { ok: false, error: "Not authorized" };
+
     await prisma.group.update({
       where: { id: groupId },
       data: { logoUrl: url },
