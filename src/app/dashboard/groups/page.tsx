@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { getOrCreateUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { Button } from "@/components/ui/button";
@@ -69,9 +70,15 @@ export default async function GroupsPage() {
                     href={`/dashboard/groups/${g.id}`}
                     className="flex items-center gap-3 rounded-lg p-2 hover:bg-accent"
                   >
-                    <div className="h-10 w-10 rounded-lg border bg-muted shrink-0 overflow-hidden">
+                    <div className="h-10 w-10 rounded-lg border bg-muted shrink-0 overflow-hidden relative">
                       {g.logoUrl ? (
-                        <img src={toDisplayUrl(g.logoUrl) ?? g.logoUrl} alt="" className="h-full w-full object-cover" />
+                        <Image
+                          src={toDisplayUrl(g.logoUrl) ?? g.logoUrl}
+                          alt=""
+                          fill
+                          className="object-cover"
+                          sizes="40px"
+                        />
                       ) : null}
                     </div>
                     <span className="font-medium">{g.name}</span>

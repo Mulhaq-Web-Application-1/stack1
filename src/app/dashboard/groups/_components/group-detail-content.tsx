@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -45,12 +46,14 @@ export function GroupDetailContent(props: {
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex items-center gap-4">
-          <div className="h-16 w-16 rounded-xl border bg-muted overflow-hidden shrink-0">
+          <div className="h-16 w-16 rounded-xl border bg-muted overflow-hidden shrink-0 relative">
             {group.logoUrl ? (
-              <img
+              <Image
                 src={toDisplayUrl(group.logoUrl) ?? group.logoUrl}
                 alt=""
-                className="h-full w-full object-cover"
+                fill
+                className="object-cover"
+                sizes="64px"
               />
             ) : (
               <div className="h-full w-full flex items-center justify-center text-muted-foreground">
@@ -136,12 +139,14 @@ export function GroupDetailContent(props: {
                       href={`/dashboard/groups/${c.id}`}
                       className="flex items-center gap-3 rounded-lg p-2 hover:bg-accent"
                     >
-                      <div className="h-8 w-8 rounded border bg-muted overflow-hidden">
+                      <div className="h-8 w-8 rounded border bg-muted overflow-hidden relative">
                         {c.logoUrl ? (
-                          <img
+                          <Image
                             src={toDisplayUrl(c.logoUrl) ?? c.logoUrl}
                             alt=""
-                            className="h-full w-full object-cover"
+                            fill
+                            className="object-cover"
+                            sizes="32px"
                           />
                         ) : null}
                       </div>
@@ -186,12 +191,14 @@ export function GroupDetailContent(props: {
                     href={`/dashboard/groups/${group.id}/pages/${p.id}/edit`}
                     className="flex items-center gap-3 rounded-lg border p-3 hover:bg-accent"
                   >
-                    <div className="h-12 w-24 rounded border bg-muted shrink-0 overflow-hidden">
+                    <div className="h-12 w-24 rounded border bg-muted shrink-0 overflow-hidden relative">
                       {p.coverPhotoUrl ? (
-                        <img
+                        <Image
                           src={toDisplayUrl(p.coverPhotoUrl) ?? p.coverPhotoUrl}
                           alt=""
-                          className="h-full w-full object-cover"
+                          fill
+                          className="object-cover"
+                          sizes="96px"
                         />
                       ) : null}
                     </div>

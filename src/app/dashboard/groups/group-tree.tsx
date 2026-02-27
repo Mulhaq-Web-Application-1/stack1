@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { ChevronRight, Users, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toDisplayUrl } from "@/lib/image-url";
@@ -29,12 +30,14 @@ export function GroupTree({
             href={`/dashboard/groups/${group.id}`}
             className="flex items-center gap-3 rounded-lg p-2 hover:bg-accent transition-colors"
           >
-            <div className="h-10 w-10 rounded-lg border bg-muted overflow-hidden shrink-0">
+            <div className="h-10 w-10 rounded-lg border bg-muted overflow-hidden shrink-0 relative">
               {group.logoUrl ? (
-                <img
+                <Image
                   src={toDisplayUrl(group.logoUrl) ?? group.logoUrl}
                   alt=""
-                  className="h-full w-full object-cover"
+                  fill
+                  className="object-cover"
+                  sizes="40px"
                 />
               ) : (
                 <div className="h-full w-full flex items-center justify-center text-muted-foreground">

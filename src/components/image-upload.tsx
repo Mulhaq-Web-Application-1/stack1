@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -105,14 +106,16 @@ export function ImageUpload({
       )}
       {variant === "logo" && (
         <div className="flex items-center gap-4">
-          <div className="h-20 w-20 rounded-lg border border-border bg-muted overflow-hidden flex items-center justify-center">
+          <div className="h-20 w-20 rounded-lg border border-border bg-muted overflow-hidden flex items-center justify-center relative">
             {uploading ? (
               <Skeleton className="h-full w-full" />
             ) : displayUrl ? (
-              <img
+              <Image
                 src={displayUrl}
                 alt="Logo"
-                className="h-full w-full object-cover"
+                fill
+                className="object-cover"
+                sizes="80px"
               />
             ) : (
               <span className="text-muted-foreground text-xs">No logo</span>
@@ -132,14 +135,16 @@ export function ImageUpload({
       )}
       {isCover && (
         <div className="space-y-2">
-          <div className="aspect-video max-w-md rounded-lg border border-border bg-muted overflow-hidden">
+          <div className="aspect-video max-w-md rounded-lg border border-border bg-muted overflow-hidden relative">
             {uploading ? (
               <Skeleton className="h-full w-full" />
             ) : displayUrl ? (
-              <img
+              <Image
                 src={displayUrl}
                 alt="Cover"
-                className="h-full w-full object-cover"
+                fill
+                className="object-cover"
+                sizes="(max-width: 448px) 100vw, 448px"
               />
             ) : (
               <div className="h-full flex items-center justify-center text-muted-foreground text-sm">
