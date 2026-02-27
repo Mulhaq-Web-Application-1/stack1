@@ -77,10 +77,10 @@ Copy `.env.example` to `.env` and fill in:
   - Set `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` and `CLERK_SECRET_KEY`.  
   - Configure **Paths**: Sign-in URL `/sign-in`, Sign-up URL `/sign-up`, After sign-in/sign-up → `/dashboard`.
 
-- **Cloudflare R2**  
+- **Cloudflare R2** ([API docs](https://developers.cloudflare.com/r2/api/))  
   - [Cloudflare Dashboard](https://dash.cloudflare.com) → R2 → Create bucket.  
-  - R2 → Manage R2 API Tokens → Create API token (Object Read & Write).  
-  - Set `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET_NAME`.  
+  - R2 → **Manage R2 API Tokens** → Create API token (Object Read & Write). Copy **Access Key ID** and **Secret Access Key** — these are the S3-compatible credentials ([tokens guide](https://developers.cloudflare.com/r2/api/tokens/)).  
+  - Set `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET_NAME`. Endpoint is `https://<R2_ACCOUNT_ID>.r2.cloudflarestorage.com`.  
   - Optional: `R2_PUBLIC_URL` if the bucket has a public custom domain.
 
 ### 3. Database
