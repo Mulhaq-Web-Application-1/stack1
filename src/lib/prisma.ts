@@ -3,8 +3,10 @@ import { PrismaNeon } from "@prisma/adapter-neon";
 import { neonConfig } from "@neondatabase/serverless";
 import ws from "ws";
 
-// Use WebSockets (port 443) so DB works when port 5432 is blocked
+// WebSocket transport for Node.js (native WebSocket not available in Node < 22)
 neonConfig.webSocketConstructor = ws;
+// Cache the WebSocket connection across queries in the same lambda invocation
+neonConfig.fetchConnectionCache = true;
 
 const connectionString = process.env.DATABASE_URL;
 const adapter = connectionString
@@ -23,4 +25,6 @@ export const prisma =
         : ["error"],
   });
 
-if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
+// Cache in all environments so warm serverless invocations reuse the client
+// (previously only cached in dev, causing a new client per cold start in prod)
+globalForPrisma.prisma = prisma;
