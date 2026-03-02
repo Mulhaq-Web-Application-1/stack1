@@ -3,6 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { ChevronRight, Users, FileText } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { toDisplayUrl } from "@/lib/image-url";
 
@@ -23,47 +24,50 @@ export function GroupTree({
   depth?: number;
 }) {
   return (
-    <ul className={cn("space-y-1", depth > 0 && "ml-4 border-l-2 border-border pl-4")}>
+    <ul className={cn("space-y-3", depth > 0 && "ml-4 space-y-3 border-l-2 border-border pl-4")}>
       {groups.map((group) => (
-        <li key={group.id} className="py-2">
-          <Link
-            href={`/dashboard/groups/${group.id}`}
-            className="flex items-center gap-3 rounded-lg p-2 hover:bg-accent transition-colors"
-          >
-            <div className="h-10 w-10 rounded-lg border bg-muted overflow-hidden shrink-0 relative">
-              {group.logoUrl ? (
-                <Image
-                  src={toDisplayUrl(group.logoUrl) ?? group.logoUrl}
-                  alt=""
-                  fill
-                  className="object-cover"
-                  sizes="40px"
-                />
-              ) : (
-                <div className="h-full w-full flex items-center justify-center text-muted-foreground">
-                  <ChevronRight className="h-5 w-5" />
+        <li key={group.id}>
+          <Link href={`/dashboard/groups/${group.id}`} className="block">
+            <Card className="overflow-hidden transition-colors hover:bg-muted/50">
+              <CardContent className="flex items-center gap-3 p-4">
+                <div className="h-11 w-11 shrink-0 overflow-hidden rounded-lg border bg-muted relative">
+                  {group.logoUrl ? (
+                    <Image
+                      src={toDisplayUrl(group.logoUrl) ?? group.logoUrl}
+                      alt=""
+                      fill
+                      className="object-cover"
+                      sizes="44px"
+                    />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center text-muted-foreground">
+                      <ChevronRight className="h-5 w-5" />
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="font-medium truncate">{group.name}</p>
-              <p className="text-xs text-muted-foreground flex items-center gap-2">
-                <span className="flex items-center gap-1">
-                  <Users className="h-3 w-3" />
-                  {group._count?.members ?? (Array.isArray(group.members) ? group.members.length : 0)} members
-                </span>
-                {(group._count?.pages ?? 0) > 0 && (
-                  <span className="flex items-center gap-1">
-                    <FileText className="h-3 w-3" />
-                    {group._count?.pages} pages
-                  </span>
-                )}
-              </p>
-            </div>
-            <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
+                <div className="min-w-0 flex-1">
+                  <p className="font-medium truncate text-foreground">{group.name}</p>
+                  <p className="mt-0.5 flex items-center gap-3 text-xs text-muted-foreground">
+                    <span className="flex items-center gap-1">
+                      <Users className="h-3 w-3" />
+                      {group._count?.members ?? (Array.isArray(group.members) ? group.members.length : 0)} members
+                    </span>
+                    {(group._count?.pages ?? 0) > 0 && (
+                      <span className="flex items-center gap-1">
+                        <FileText className="h-3 w-3" />
+                        {group._count?.pages} pages
+                      </span>
+                    )}
+                  </p>
+                </div>
+                <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
+              </CardContent>
+            </Card>
           </Link>
           {group.childGroups && group.childGroups.length > 0 ? (
-            <GroupTree groups={group.childGroups} depth={depth + 1} />
+            <div className="mt-3">
+              <GroupTree groups={group.childGroups} depth={depth + 1} />
+            </div>
           ) : null}
         </li>
       ))}

@@ -22,17 +22,27 @@ export default async function DashboardPage() {
   });
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Files</h1>
-        <p className="text-muted-foreground">
-          Upload and manage your files. Stored in Cloudflare R2.
+    <div className="mx-auto max-w-4xl space-y-10">
+      <header className="space-y-1">
+        <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">Files</h1>
+        <p className="text-sm text-muted-foreground">
+          Upload and manage your files. Stored securely in Cloudflare R2.
         </p>
-      </div>
+      </header>
 
-      <UploadForm />
+      <section aria-labelledby="upload-heading">
+        <h2 id="upload-heading" className="sr-only">
+          Upload file
+        </h2>
+        <UploadForm />
+      </section>
 
-      <FileList files={files} />
+      <section aria-labelledby="files-heading" className="space-y-4">
+        <h2 id="files-heading" className="sr-only">
+          Your files
+        </h2>
+        <FileList files={files} />
+      </section>
     </div>
   );
 }

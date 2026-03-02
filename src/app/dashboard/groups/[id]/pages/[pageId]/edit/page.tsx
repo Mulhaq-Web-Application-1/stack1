@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { Button } from "@/components/ui/button";
 import { PageForm } from "../../../../_components/page-form";
 import { DeletePageButton } from "./delete-page-button";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, Globe } from "lucide-react";
 
 export default async function EditPagePage({
   params,
@@ -41,7 +41,15 @@ export default async function EditPagePage({
       </Button>
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Edit page</h1>
-        <DeletePageButton pageId={pageId} groupId={groupId} />
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" asChild>
+            <Link href={`/p/${pageId}`} target="_blank" className="flex items-center gap-1.5">
+              <Globe className="h-4 w-4" />
+              View public page
+            </Link>
+          </Button>
+          <DeletePageButton pageId={pageId} groupId={groupId} />
+        </div>
       </div>
       <PageForm
         groupId={groupId}

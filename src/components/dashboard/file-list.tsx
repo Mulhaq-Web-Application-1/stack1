@@ -46,12 +46,14 @@ export function FileList({ files }: FileListProps) {
 
   if (files.length === 0) {
     return (
-      <Card>
-        <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-          <FileText className="h-12 w-12 text-muted-foreground" />
-          <p className="mt-2 font-medium">No files yet</p>
-          <p className="text-sm text-muted-foreground">
-            Upload a file above to get started.
+      <Card className="border-dashed">
+        <CardContent className="flex flex-col items-center justify-center py-16 text-center">
+          <div className="rounded-full bg-muted p-4">
+            <FileText className="h-10 w-10 text-muted-foreground" />
+          </div>
+          <p className="mt-4 font-medium text-foreground">No files yet</p>
+          <p className="mt-1 max-w-sm text-sm text-muted-foreground">
+            Upload a file using the form above to get started.
           </p>
         </CardContent>
       </Card>
@@ -60,23 +62,38 @@ export function FileList({ files }: FileListProps) {
 
   return (
     <>
-      <div className="space-y-2">
-        <h2 className="text-lg font-semibold">Your files</h2>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <p className="text-sm font-medium text-foreground">
+            Your files
+            <span className="ml-2 font-normal text-muted-foreground">
+              ({files.length})
+            </span>
+          </p>
+        </div>
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {files.map((file) => (
-            <Card key={file.id} className="overflow-hidden">
+            <Card
+              key={file.id}
+              className="overflow-hidden transition-colors hover:bg-muted/50"
+            >
               <CardContent className="p-4">
-                <div className="flex items-start justify-between gap-2">
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate font-medium" title={file.name}>
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0 flex-1 space-y-1">
+                    <p
+                      className="truncate text-sm font-medium text-foreground"
+                      title={file.name}
+                    >
                       {file.name}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      {formatBytes(file.size)} · {new Date(file.createdAt).toLocaleDateString()}
+                      {formatBytes(file.size)}
+                      <span className="mx-1.5">·</span>
+                      {new Date(file.createdAt).toLocaleDateString()}
                     </p>
                   </div>
-                  <div className="flex shrink-0 items-center gap-1">
-                    <Button variant="ghost" size="icon" asChild>
+                  <div className="flex shrink-0 items-center gap-0.5">
+                    <Button variant="ghost" size="icon" className="h-8 w-8" asChild>
                       <Link href={file.url} target="_blank" rel="noopener noreferrer">
                         <ExternalLink className="h-4 w-4" />
                       </Link>
@@ -84,10 +101,11 @@ export function FileList({ files }: FileListProps) {
                     <Button
                       variant="ghost"
                       size="icon"
+                      className="h-8 w-8 text-muted-foreground hover:text-destructive"
                       onClick={() => setConfirmId(file.id)}
                       disabled={deletingId !== null}
                     >
-                      <Trash2 className="h-4 w-4 text-destructive" />
+                      <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
                 </div>
