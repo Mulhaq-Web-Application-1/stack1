@@ -1,10 +1,12 @@
 import { PrismaClient } from "@prisma/client";
 import { PrismaNeon } from "@prisma/adapter-neon";
 import { neonConfig } from "@neondatabase/serverless";
-import ws from "ws";
 
-// WebSocket transport for Node.js (native WebSocket not available in Node < 22)
-neonConfig.webSocketConstructor = ws;
+// Use native WebSocket (Node 18+) or fall back to the 'ws' package
+if (typeof globalThis.WebSocket === "undefined") {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  neonConfig.webSocketConstructor = require("ws");
+}
 // Cache the WebSocket connection across queries in the same lambda invocation
 neonConfig.fetchConnectionCache = true;
 
